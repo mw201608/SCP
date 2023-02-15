@@ -104,7 +104,7 @@ check_srtList <- function(srtList, batch = NULL, assay = NULL,
   })
   if (length(unique(features_list)) != 1) {
     if (type == "Chromatin") {
-      warning("The peaks in assay ", assay, " is different between batches. Creating a common set of peaks by 'merge' function...")
+      warning("The peaks in assay ", assay, " is different between batches. Creating a common set of peaks and may take a long time...")
       srtMerge <- Reduce(merge, srtList)
       srtList <- SplitObject(object = srtMerge, split.by = batch)
     }
@@ -1049,6 +1049,12 @@ Uncorrected_integrate <- function(srtMerge = NULL, batch = NULL, append = TRUE, 
     HVF <- checked[["HVF"]]
     assay <- checked[["assay"]]
     type <- checked[["type"]]
+  }
+
+  if (normalization_method == "TFIDF") {
+    cat(paste0("[", Sys.time(), "]", " normalization_method is 'TFIDF'. Use 'lsi' workflow...\n"))
+    do_scaling <- FALSE
+    linear_reduction <- "svd"
   }
 
   cat(paste0("[", Sys.time(), "]", " Perform integration(Uncorrected) on the data...\n"))
@@ -3064,7 +3070,7 @@ Conos_integrate <- function(srtMerge = NULL, batch = NULL, append = TRUE, srtLis
   }
 
   cat(paste0("[", Sys.time(), "]", " Perform integration(Conos) on the data...\n"))
-  message("Conos using ", linear_reduction, "(dims_max:", maxdims, ")", ") as input")
+  message("Conos using ", linear_reduction, "(dims_max:", maxdims, ") as input")
   srtList_con <- conos::Conos$new(srtList, n.cores = num_threads)
   params <- list(
     ncomps = maxdims,
