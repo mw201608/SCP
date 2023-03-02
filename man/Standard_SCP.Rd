@@ -81,7 +81,7 @@ Single cell pipeline for the single dataset.
 \examples{
 data("pancreas_sub")
 pancreas_sub <- Standard_SCP(srt = pancreas_sub)
-ClassDimPlot(pancreas_sub, group.by = "SubCellType")
+CellDimPlot(pancreas_sub, group.by = "SubCellType")
 
 # Use a combination of different linear or non-linear dimension reduction methods
 linear_reductions <- c("pca", "ica", "nmf", "mds", "glmpca")
@@ -90,8 +90,8 @@ pancreas_sub <- Standard_SCP(
   linear_reduction = linear_reductions,
   nonlinear_reduction = "umap"
 )
-plist1 <- lapply(linear_reductions, function(lr) ClassDimPlot(pancreas_sub, group.by = "SubCellType", reduction = paste0("Standard", lr, "UMAP2D"), theme = "theme_blank"))
-cowplot::plot_grid(plotlist = plist1)
+plist1 <- lapply(linear_reductions, function(lr) CellDimPlot(pancreas_sub, group.by = "SubCellType", reduction = paste0("Standard", lr, "UMAP2D"), theme = "theme_blank"))
+patchwork::wrap_plots(plotlist = plist1)
 
 nonlinear_reductions <- c("umap", "tsne", "dm", "phate", "pacmap", "trimap", "largevis")
 pancreas_sub <- Standard_SCP(
@@ -99,7 +99,7 @@ pancreas_sub <- Standard_SCP(
   linear_reduction = "pca",
   nonlinear_reduction = nonlinear_reductions
 )
-plist2 <- lapply(nonlinear_reductions, function(nr) ClassDimPlot(pancreas_sub, group.by = "SubCellType", reduction = paste0("Standardpca", toupper(nr), "2D"), theme = "theme_blank"))
-cowplot::plot_grid(plotlist = plist2)
+plist2 <- lapply(nonlinear_reductions, function(nr) CellDimPlot(pancreas_sub, group.by = "SubCellType", reduction = paste0("Standardpca", toupper(nr), "2D"), theme = "theme_blank"))
+patchwork::wrap_plots(plotlist = plist2)
 
 }

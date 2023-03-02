@@ -11,7 +11,7 @@ DynamicPlot(
   group.by = NULL,
   cells = NULL,
   slot = "counts",
-  assay = "RNA",
+  assay = NULL,
   family = NULL,
   exp_method = c("log1p", "raw", "zscore", "fc", "log2fc"),
   lib_normalize = identical(slot, "counts"),
@@ -38,8 +38,7 @@ DynamicPlot(
   nrow = NULL,
   ncol = NULL,
   byrow = TRUE,
-  align = "hv",
-  axis = "lr"
+  seed = 11
 )
 }
 \arguments{

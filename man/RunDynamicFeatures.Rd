@@ -13,10 +13,9 @@ RunDynamicFeatures(
   minfreq = 5,
   family = NULL,
   slot = "counts",
-  assay = "RNA",
+  assay = NULL,
   libsize = NULL,
   BPPARAM = BiocParallel::bpparam(),
-  progressbar = TRUE,
   seed = 11
 )
 }

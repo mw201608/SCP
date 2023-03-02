@@ -18,20 +18,20 @@ RunEnrichment(
   db = "GO_BP",
   db_update = FALSE,
   db_version = "latest",
-  convert_species = FALSE,
+  db_combine = FALSE,
+  convert_species = TRUE,
   Ensembl_version = 103,
   mirror = NULL,
   TERM2GENE = NULL,
   TERM2NAME = NULL,
   minGSSize = 10,
   maxGSSize = 500,
-  universe = NULL,
-  GO_simplify = TRUE,
-  GO_simplify_padjustCutoff = 0.2,
-  simplify_method = "Rel",
+  GO_simplify = FALSE,
+  GO_simplify_cutoff = "p.adjust < 0.05",
+  simplify_method = "Wang",
   simplify_similarityCutoff = 0.7,
   BPPARAM = BiocParallel::bpparam(),
-  progressbar = TRUE
+  seed = 11
 )
 }
 \arguments{
@@ -59,15 +59,15 @@ RunEnrichment(
 
 \item{maxGSSize}{maxGSSize}
 
-\item{universe}{universe}
-
 \item{GO_simplify}{GO_simplify}
-
-\item{GO_simplify_padjustCutoff}{GO_simplify_padjustCutoff}
 
 \item{simplify_method}{simplify_method}
 
 \item{simplify_similarityCutoff}{simplify_similarityCutoff}
+
+\item{GO_simplify_padjustCutoff}{GO_simplify_padjustCutoff}
+
+\item{universe}{universe}
 }
 \description{
 Perform the enrichment analysis(over-representation) on the genes
@@ -76,11 +76,24 @@ Perform the enrichment analysis(over-representation) on the genes
 data("pancreas_sub")
 pancreas_sub <- RunDEtest(pancreas_sub, group_by = "CellType")
 pancreas_sub <- RunEnrichment(srt = pancreas_sub, group_by = "CellType", db = "GO_BP", species = "Mus_musculus")
-EnrichmentPlot(pancreas_sub, group_by = "CellType", db = "GO_BP", plot_type = "bar")
+EnrichmentPlot(pancreas_sub, db = "GO_BP", group_by = "CellType", plot_type = "comparison")
+
+# Remove redundant GO terms
+pancreas_sub <- RunEnrichment(srt = pancreas_sub, group_by = "CellType", db = "GO_BP", GO_simplify = TRUE, species = "Mus_musculus")
+EnrichmentPlot(pancreas_sub, db = "GO_BP_sim", group_by = "CellType", plot_type = "comparison")
+
+# Use a combined database
+pancreas_sub <- RunEnrichment(
+  srt = pancreas_sub, group_by = "CellType",
+  db = c("KEGG", "WikiPathway", "Reactome", "PFAM", "MP"),
+  db_combine = TRUE,
+  species = "Mus_musculus"
+)
+EnrichmentPlot(pancreas_sub, db = "Combined", group_by = "CellType", plot_type = "comparison")
 
 # Or use "geneID" and "geneID_groups" as input to run enrichment
 de_df <- dplyr::filter(pancreas_sub@tools$DEtest_CellType$AllMarkers_wilcox, avg_log2FC > 0 & p_val_adj < 0.05)
 enrich_out <- RunEnrichment(geneID = de_df[["gene"]], geneID_groups = de_df[["group1"]], db = "GO_BP", species = "Mus_musculus")
-EnrichmentPlot(res = enrich_out, group_use = c("Ngn3 low EP", "Endocrine"), db = "GO_BP")
+EnrichmentPlot(res = enrich_out, db = "GO_BP", plot_type = "comparison")
 
 }

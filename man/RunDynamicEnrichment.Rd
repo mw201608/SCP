@@ -10,7 +10,7 @@ RunDynamicEnrichment(
   score_method = "AUCell",
   ncore = 1,
   slot = "data",
-  assay = "RNA",
+  assay = NULL,
   min_expcells = 20,
   r.sq = 0.2,
   dev.expl = 0.2,
@@ -20,7 +20,7 @@ RunDynamicEnrichment(
   db = "GO_BP",
   db_update = FALSE,
   db_version = "latest",
-  convert_species = FALSE,
+  convert_species = TRUE,
   Ensembl_version = 103,
   mirror = NULL,
   TERM2GENE = NULL,
@@ -28,7 +28,6 @@ RunDynamicEnrichment(
   minGSSize = 10,
   maxGSSize = 500,
   BPPARAM = BiocParallel::bpparam(),
-  progressbar = TRUE,
   seed = 11
 )
 }
