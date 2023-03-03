@@ -2828,7 +2828,7 @@ PrepareDB <- function(species = c("Homo_sapiens", "Mus_musculus"),
 #' enrich_out <- RunEnrichment(geneID = de_df[["gene"]], geneID_groups = de_df[["group1"]], db = "GO_BP", species = "Mus_musculus")
 #' EnrichmentPlot(res = enrich_out, db = "GO_BP", plot_type = "comparison")
 #'
-#' @importFrom BiocParallel bplapply bpprogressbar<- bpRNGseed<- bpworkers
+#' @importFrom BiocParallel bplapply bpprogressbar<- bpRNGseed<- bpworkers ipcid ipclock ipcunlock
 #' @importFrom clusterProfiler enricher simplify
 #' @export
 #'
@@ -2938,7 +2938,7 @@ RunEnrichment <- function(srt = NULL, group_by = NULL, test.use = "wilcox", DE_t
   suppressPackageStartupMessages(requireNamespace("DOSE", quietly = TRUE))
   comb <- expand.grid(group = levels(geneID_groups), term = db, stringsAsFactors = FALSE)
 
-  res_list <- bplapply(seq_len(nrow(comb)), function(i) {
+  res_list <- bplapply(seq_len(nrow(comb)), function(i, id) {
     group <- comb[i, "group"]
     term <- comb[i, "term"]
     gene <- input[input$geneID_groups == group, IDtype]
@@ -2995,12 +2995,13 @@ RunEnrichment <- function(srt = NULL, group_by = NULL, test.use = "wilcox", DE_t
         } else {
           sim_res@result <- sim_res@result[with(sim_res@result, eval(rlang::parse_expr(GO_simplify_cutoff))), ]
           semData <- db_list[[species]][[term]][["semData"]]
+          ipclock(id)
           sim_res <- simplify(sim_res,
             measure = simplify_method,
             cutoff = simplify_similarityCutoff,
             semData = semData
           )
-
+          ipcunlock(id)
           result_sim <- sim_res@result
           result_sim[["Database"]] <- paste0(term, "_sim")
           result_sim[["Groups"]] <- group
@@ -3014,7 +3015,7 @@ RunEnrichment <- function(srt = NULL, group_by = NULL, test.use = "wilcox", DE_t
       enrich_res <- NULL
     }
     return(enrich_res)
-  }, BPPARAM = BPPARAM)
+  }, BPPARAM = BPPARAM, id = ipcid())
 
   nm <- paste(comb$group, comb$term, sep = "-")
   sim_index <- sapply(res_list, function(x) length(x) == 2)
@@ -3098,7 +3099,7 @@ RunEnrichment <- function(srt = NULL, group_by = NULL, test.use = "wilcox", DE_t
 #' gsea_out <- RunGSEA(geneID = de_df[["gene"]], geneScore = de_df[["avg_log2FC"]], geneID_groups = de_df[["group1"]], db = "GO_BP", species = "Mus_musculus")
 #' GSEAPlot(res = gsea_out, db = "GO_BP", plot_type = "comparison")
 #'
-#' @importFrom BiocParallel bplapply bpprogressbar<- bpRNGseed<- bpworkers
+#' @importFrom BiocParallel bplapply bpprogressbar<- bpRNGseed<- bpworkers ipcid ipclock ipcunlock
 #' @importFrom clusterProfiler GSEA simplify
 #' @export
 #'
@@ -3231,7 +3232,7 @@ RunGSEA <- function(srt = NULL, group_by = NULL, test.use = "wilcox", DE_thresho
   message("Permform GSEA...")
   suppressPackageStartupMessages(requireNamespace("DOSE", quietly = TRUE))
   comb <- expand.grid(group = levels(geneID_groups), term = db, stringsAsFactors = FALSE)
-  res_list <- bplapply(seq_len(nrow(comb)), function(i) {
+  res_list <- bplapply(seq_len(nrow(comb)), function(i, id) {
     group <- comb[i, "group"]
     term <- comb[i, "term"]
     geneList <- input[input$geneID_groups == group, "geneScore"]
@@ -3295,11 +3296,13 @@ RunGSEA <- function(srt = NULL, group_by = NULL, test.use = "wilcox", DE_thresho
         } else {
           sim_res@result <- sim_res@result[with(sim_res@result, eval(rlang::parse_expr(GO_simplify_cutoff))), ]
           semData <- db_list[[species]][[term]][["semData"]]
+          ipclock(id)
           sim_res <- simplify(sim_res,
             measure = simplify_method,
             cutoff = simplify_similarityCutoff,
             semData = semData
           )
+          ipcunlock(id)
           result_sim <- sim_res@result
           result_sim[["Database"]] <- paste0(term, "_sim")
           result_sim[["Groups"]] <- group
@@ -3313,7 +3316,7 @@ RunGSEA <- function(srt = NULL, group_by = NULL, test.use = "wilcox", DE_thresho
       enrich_res <- NULL
     }
     return(enrich_res)
-  }, BPPARAM = BPPARAM)
+  }, BPPARAM = BPPARAM, id = ipcid())
 
   nm <- paste(comb$group, comb$term, sep = "-")
   sim_index <- sapply(res_list, function(x) length(x) == 2)
