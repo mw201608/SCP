@@ -65,6 +65,14 @@ if (!require("devtools", quietly = TRUE)) {
 }
 devtools::install_github("zhanghao-njmu/SCP")
 ```
+To install from this fork
+``` r
+if (!require("devtools", quietly = TRUE)) {
+  install.packages("devtools")
+}
+devtools::install_github("mw201608/SCP")
+```
+
 
 #### Create SCP python environment
 
